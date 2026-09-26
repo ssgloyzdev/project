@@ -1,5 +1,5 @@
 // ==========================================
-// 0. GLOBAL ERROR CATCHER & OVERLAY (UNTUK HP)
+// 0. GLOBAL ERROR CATCHER & OVERLAY (UNTUK MOBILE/HP DEBUG)
 // ==========================================
 window.addEventListener('error', function (e) {
     showErrorOverlay(`Uncaught Error:\n${e.message}\n\nFile: ${e.filename}\nLine: ${e.lineno}:${e.colno}`);
@@ -95,6 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function createCustomCursor() {
+    // Matikan kursor kustom di HP/layar sentuh agar navigasi lancar
     if (window.matchMedia("(pointer: coarse)").matches) return;
 
     const cursor = document.createElement("div");
@@ -109,12 +110,12 @@ function createCustomCursor() {
 }
 
 // ==========================================
-// 2. AUTHENTICATION (GITHUB OAUTH & ROLE CHECK)
+// 2. AUTHENTICATION & ROLE CHECKING
 // ==========================================
 async function loginWithGithub() {
     try {
-        if (typeof supabase === 'undefined' || !supabase) {
-            throw new Error("Client Supabase belum diinisialisasi. Periksa apakah config.js sudah memuat URL & ANON KEY yang benar.");
+        if (typeof supabase === 'undefined' || !supabase || !supabase.auth) {
+            throw new Error("Client Supabase belum terinisialisasi. Periksa apakah SUPABASE_URL & ANON_KEY di js/config.js sudah terisi dengan benar!");
         }
 
         const redirectUri = window.location.origin + window.location.pathname.replace('/login/register.html', '/content/source.html');
