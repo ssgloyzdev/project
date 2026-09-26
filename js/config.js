@@ -1,19 +1,23 @@
 // --- KONFIGURASI SUPABASE LOYZDEV ---
-const SUPABASE_URL = 'https://khlzjpfatevjtkiziyok.supabase.co'; // Ganti dengan URL Supabase kamu
-const SUPABASE_ANON_KEY = 'sb_publishable_3lbPrS7vhOzJpDwstP5jGg_zet-o9e5';                // Ganti dengan Anon Key kamu
+const SUPABASE_URL = 'https://khlzjpfatevjtkiziyok.supabase.co'; 
+const SUPABASE_ANON_KEY = 'sb_publishable_3lbPrS7vhOzJpDwstP5jGg_zet-o9e5'; 
 
 // Deklarasi variabel global supabase
-let supabase;
+var supabase = null;
 
-try {
-    // Ambil client Supabase dari window.supabase atau supabase library
-    const supabaseClient = window.supabase || window.supabaseClient;
+// Helper inisialisasi yang tahan terhadap delay pemuatan CDN di HP/koneksi lambat
+function getSupabaseClient() {
+    if (supabase) return supabase;
 
-    if (supabaseClient && typeof supabaseClient.createClient === 'function') {
-        supabase = supabaseClient.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    } else {
-        console.error("SDK Supabase JS belum dimuat dari CDN!");
+    // Ambil objek library dari CDN window
+    const supabaseLib = window.supabase || window.supabaseClient;
+
+    if (supabaseLib && typeof supabaseLib.createClient === 'function') {
+        supabase = supabaseLib.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        return supabase;
     }
-} catch (err) {
-    console.error("Gagal menginisialisasi Supabase:", err);
+    return null;
 }
+
+// Inisialisasi awal saat config.js di-load
+getSupabaseClient();
