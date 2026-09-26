@@ -1,1 +1,54 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karya & Showcase - LoyzDev</title>
 
+    <!-- Pastikan nama folder 'css' dan 'style.css' semuanya huruf kecil -->
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <!-- CDN Wajib loaded sebelum script internal -->
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div id="particles-js"></div>
+
+    <header class="navbar">
+        <div class="logo"><a href="../index.html">LoyzDev <span>🦋</span></a></div>
+        <div id="admin-indicator" class="admin-badge" style="display: none;">Mode Admin Active</div>
+    </header>
+
+    <main class="container">
+        <h2 class="section-title">Galeri Karya Statis</h2>
+        
+        <section id="admin-panel" class="admin-box" style="display: none;">
+            <h3 id="form-title">Tambah Karya Baru</h3>
+            <input type="hidden" id="project-id">
+            <input type="text" id="project-title" placeholder="Judul Karya..." class="input-field">
+            <textarea id="project-html" placeholder="Masukkan HTML / JS..." class="input-field code-input"></textarea>
+            <div class="admin-actions">
+                <button onclick="saveProject()" class="btn-hutao sm">Simpan Karya</button>
+                <button onclick="resetForm()" class="btn-secondary sm">Batal</button>
+            </div>
+        </section>
+
+        <div id="projects-list" class="grid-container">
+            <p class="loading-text">Memuat karya-karya mistis...</p>
+        </div>
+    </main>
+
+    <div id="render-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <div id="render-area"></div>
+        </div>
+    </div>
+
+    <!-- Pastikan nama folder 'js' dan file semuanya huruf kecil -->
+    <script src="../js/config.js"></script>
+    <script src="../js/script.js"></script>
+</body>
+</html>
