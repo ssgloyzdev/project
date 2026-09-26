@@ -13,7 +13,6 @@ window.addEventListener('unhandledrejection', function (e) {
 function showErrorOverlay(msg) {
     let btn = document.getElementById('debug-err-btn');
     let modal = document.getElementById('debug-err-modal');
-    let content = document.getElementById('debug-err-text');
 
     if (!btn) {
         // Buat Tombol Floating "!"
@@ -25,7 +24,7 @@ function showErrorOverlay(msg) {
             width: 50px; height: 50px; border-radius: 50%;
             background: #ff3b47; color: #fff; font-size: 24px; font-weight: bold;
             border: 2px solid #e5a93c; box-shadow: 0 0 15px rgba(255, 59, 71, 0.8);
-            cursor: pointer; animation: pulse 1.5s infinite;
+            cursor: pointer;
         `;
         
         // Buat Overlay Modal Pesan Error
@@ -33,7 +32,7 @@ function showErrorOverlay(msg) {
         modal.id = 'debug-err-modal';
         modal.style.cssText = `
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 1000000; padding: 20px; box-sizing: border-box;
+            background: rgba(0,0,0,0.92); z-index: 1000000; padding: 20px; box-sizing: border-box;
             overflow-y: auto; color: #ff3b47; font-family: monospace; font-size: 13px;
         `;
         
@@ -41,7 +40,7 @@ function showErrorOverlay(msg) {
             <div style="background: #1a141c; border: 1px solid #a8232b; padding: 15px; border-radius: 8px; max-width: 600px; margin: 40px auto; position: relative;">
                 <span id="close-debug-modal" style="position: absolute; right: 15px; top: 10px; color: #fff; font-size: 24px; cursor: pointer;">&times;</span>
                 <h3 style="color: #e5a93c; margin-top: 0;">⚠️ System Error Detected</h3>
-                <pre id="debug-err-text" style="white-space: pre-wrap; word-break: break-all; color: #f0e6d2; background: #0d0d11; padding: 10px; border-radius: 5px;"></pre>
+                <pre id="debug-err-text" style="white-space: pre-wrap; word-break: break-all; color: #f0e6d2; background: #0d0d11; padding: 10px; border-radius: 5px; margin-top: 10px;"></pre>
             </div>
         `;
 
@@ -49,10 +48,17 @@ function showErrorOverlay(msg) {
         document.body.appendChild(modal);
 
         btn.onclick = () => { modal.style.display = 'block'; };
-        document.getElementById('close-debug-modal').onclick = () => { modal.style.display = 'none'; };
+        document.body.addEventListener('click', function(evt) {
+            if (evt.target && evt.target.id === 'close-debug-modal') {
+                modal.style.display = 'none';
+            }
+        });
     }
 
-    content.innerText += (content.innerText ? '\n\n-------------------\n\n' : '') + msg;
+    const content = document.getElementById('debug-err-text');
+    if (content) {
+        content.innerText += (content.innerText ? '\n\n-------------------\n\n' : '') + msg;
+    }
     btn.style.display = 'block';
 }
 
@@ -79,19 +85,16 @@ document.addEventListener("DOMContentLoaded", () => {
                     "modes": { "bubble": { "distance": 200, "size": 6, "duration": 2, "opacity": 0.8 } }
                 }
             });
-        } else {
-            showErrorOverlay("Library Particles.js tidak ditemukan / gagal di-load.");
         }
     }
 
-    if (window.location.pathname.includes("source.html")) {
+    if (window.location.pathname.toLowerCase().includes("source.html")) {
         checkAdminStatus();
         fetchProjects();
     }
 });
 
 function createCustomCursor() {
-    // Hanya aktifkan kursor khusus jika bukan layar sentuh/HP
     if (window.matchMedia("(pointer: coarse)").matches) return;
 
     const cursor = document.createElement("div");
@@ -110,11 +113,11 @@ function createCustomCursor() {
 // ==========================================
 async function loginWithGithub() {
     try {
-        if (typeof supabase === 'undefined') {
-            throw new Error("Client Supabase belum diinisialisasi. Periksa config.js");
+        if (typeof supabase === 'undefined' || !supabase) {
+            throw new Error("Client Supabase belum diinisialisasi. Periksa apakah config.js sudah memuat URL & ANON KEY yang benar.");
         }
 
-        const redirectUri = window.location.origin + '/content/source.html';
+        const redirectUri = window.location.origin + window.location.pathname.replace('/login/register.html', '/content/source.html');
         
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'github',
@@ -137,7 +140,7 @@ function isUserAdmin(session) {
 
 async function checkAdminStatus() {
     try {
-        if (typeof supabase === 'undefined') return;
+        if (typeof supabase === 'undefined' || !supabase) return;
 
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) throw error;
@@ -164,7 +167,7 @@ async function fetchProjects() {
     if (!listContainer) return;
 
     try {
-        if (typeof supabase === 'undefined') {
+        if (typeof supabase === 'undefined' || !supabase) {
             throw new Error("Supabase client is missing.");
         }
 
