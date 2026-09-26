@@ -1,6 +1,19 @@
-// --- KONFIGURASI SUPABASE ---
-const SUPABASE_URL = 'https://qwhchtvmxbytxkkjlxwi.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_MIy6BVWFnDYlVgguqR_pow_jJHC6GXp';
+// --- KONFIGURASI SUPABASE LOYZDEV ---
+const SUPABASE_URL = 'https://khlzjpfatevjtkiziyok.supabase.co'; // Ganti dengan URL Supabase kamu
+const SUPABASE_ANON_KEY = 'sb_publishable_3lbPrS7vhOzJpDwstP5jGg_zet-o9e5';                // Ganti dengan Anon Key kamu
 
-// Inisialisasi Client Supabase Global
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Deklarasi variabel global supabase
+let supabase;
+
+try {
+    // Ambil client Supabase dari window.supabase atau supabase library
+    const supabaseClient = window.supabase || window.supabaseClient;
+
+    if (supabaseClient && typeof supabaseClient.createClient === 'function') {
+        supabase = supabaseClient.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } else {
+        console.error("SDK Supabase JS belum dimuat dari CDN!");
+    }
+} catch (err) {
+    console.error("Gagal menginisialisasi Supabase:", err);
+}
