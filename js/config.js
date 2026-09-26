@@ -2,22 +2,28 @@
 const SUPABASE_URL = 'https://khlzjpfatevjtkiziyok.supabase.co'; 
 const SUPABASE_ANON_KEY = 'sb_publishable_3lbPrS7vhOzJpDwstP5jGg_zet-o9e5'; 
 
-// Deklarasi variabel global supabase
 var supabase = null;
 
-// Helper inisialisasi yang tahan terhadap delay pemuatan CDN di HP/koneksi lambat
 function getSupabaseClient() {
     if (supabase) return supabase;
 
-    // Ambil objek library dari CDN window
-    const supabaseLib = window.supabase || window.supabaseClient;
+    // Cari objek Supabase di berbagai namespace global CDN
+    const lib = window.supabase || window.Supabase || window.supabaseClient;
 
-    if (supabaseLib && typeof supabaseLib.createClient === 'function') {
-        supabase = supabaseLib.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    if (lib) {
+        if (typeof lib.createClient === 'function') {
+            supabase = lib.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            return supabase;
+        }
+    }
+
+    if (typeof createClient === 'function') {
+        supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         return supabase;
     }
+
     return null;
 }
 
-// Inisialisasi awal saat config.js di-load
+// Inisialisasi langsung saat script dimuat
 getSupabaseClient();
