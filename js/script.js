@@ -95,7 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function createCustomCursor() {
-    // Matikan kursor kustom di HP/layar sentuh agar navigasi lancar
+    // Matikan kursor kustom di HP/layar sentuh agar navigasi sentuh tidak terganggu
     if (window.matchMedia("(pointer: coarse)").matches) return;
 
     const cursor = document.createElement("div");
@@ -114,13 +114,15 @@ function createCustomCursor() {
 // ==========================================
 async function loginWithGithub() {
     try {
-        if (typeof supabase === 'undefined' || !supabase || !supabase.auth) {
-            throw new Error("Client Supabase belum terinisialisasi. Periksa apakah SUPABASE_URL & ANON_KEY di js/config.js sudah terisi dengan benar!");
+        const client = (typeof getSupabaseClient === 'function') ? getSupabaseClient() : supabase;
+
+        if (!client || !client.auth) {
+            throw new Error("Library Supabase JS belum siap dari CDN. Coba muat ulang halaman (refresh) HP kamu.");
         }
 
         const redirectUri = window.location.origin + window.location.pathname.replace('/login/register.html', '/content/source.html');
         
-        const { data, error } = await supabase.auth.signInWithOAuth({
+        const { data, error } = await client.auth.signInWithOAuth({
             provider: 'github',
             options: {
                 redirectTo: redirectUri
@@ -141,9 +143,10 @@ function isUserAdmin(session) {
 
 async function checkAdminStatus() {
     try {
-        if (typeof supabase === 'undefined' || !supabase) return;
+        const client = (typeof getSupabaseClient === 'function') ? getSupabaseClient() : supabase;
+        if (!client || !client.auth) return;
 
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const { data: { session }, error } = await client.auth.getSession();
         if (error) throw error;
 
         const isAdmin = isUserAdmin(session);
@@ -168,11 +171,10 @@ async function fetchProjects() {
     if (!listContainer) return;
 
     try {
-        if (typeof supabase === 'undefined' || !supabase) {
-            throw new Error("Supabase client is missing.");
-        }
+        const client = (typeof getSupabaseClient === 'function') ? getSupabaseClient() : supabase;
+        if (!client) throw new Error("Supabase Client gagal dimuat.");
 
-        const { data: projects, error } = await supabase.from('projects').select('*').order('created_at', { ascending: false });
+        const { data: projects, error } = await client.from('projects').select('*').order('created_at', { ascending: false });
 
         if (error) throw error;
 
@@ -181,7 +183,7 @@ async function fetchProjects() {
             return;
         }
 
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session } } = await client.auth.getSession();
         const isAdmin = isUserAdmin(session);
 
         listContainer.innerHTML = projects.map(p => `
@@ -204,6 +206,9 @@ async function fetchProjects() {
 
 async function saveProject() {
     try {
+        const client = (typeof getSupabaseClient === 'function') ? getSupabaseClient() : supabase;
+        if (!client) throw new Error("Supabase Client tidak tersedia.");
+
         const id = document.getElementById('project-id').value;
         const title = document.getElementById('project-title').value;
         const html_content = document.getElementById('project-html').value;
@@ -214,10 +219,10 @@ async function saveProject() {
         }
 
         if (id) {
-            const { error } = await supabase.from('projects').update({ title, html_content }).eq('id', id);
+            const { error } = await client.from('projects').update({ title, html_content }).eq('id', id);
             if (error) throw error;
         } else {
-            const { error } = await supabase.from('projects').insert([{ title, html_content }]);
+            const { error } = await client.from('projects').insert([{ title, html_content }]);
             if (error) throw error;
         }
 
@@ -238,7 +243,10 @@ function editProject(id, title, html_content) {
 async function deleteProject(id) {
     if (confirm("Apakah kamu yakin ingin menghapus karya ini?")) {
         try {
-            const { error } = await supabase.from('projects').delete().eq('id', id);
+            const client = (typeof getSupabaseClient === 'function') ? getSupabaseClient() : supabase;
+            if (!client) throw new Error("Supabase Client tidak tersedia.");
+
+            const { error } = await client.from('projects').delete().eq('id', id);
             if (error) throw error;
             fetchProjects();
         } catch (err) {
@@ -249,7 +257,10 @@ async function deleteProject(id) {
 
 async function renderProject(id) {
     try {
-        const { data: project, error } = await supabase.from('projects').select('*').eq('id', id).single();
+        const client = (typeof getSupabaseClient === 'function') ? getSupabaseClient() : supabase;
+        if (!client) throw new Error("Supabase Client tidak tersedia.");
+
+        const { data: project, error } = await client.from('projects').select('*').eq('id', id).single();
         if (error) throw error;
 
         const renderArea = document.getElementById('render-area');
